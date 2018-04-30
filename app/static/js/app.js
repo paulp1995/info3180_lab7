@@ -12,6 +12,9 @@ Vue.component('app-header', {
           <li class="nav-item active">
             <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
           </li>
+          <li class="nav-item active">
+            <router-link class="nav-link" to="/upload">Upload <span class="sr-only">(current)</span></router-link>
+          </li>
         </ul>
       </div>
     </nav>
@@ -47,6 +50,57 @@ const router = new VueRouter({
     ]
 });
 
+const Upload = new Vue.component('upload-form',
+{
+   template:
+   `
+   <div class="main">
+        <form @submit.prevent="uploadPhoto" method="post" enctype="multipart/form-data" id="uploadPhoto">
+            <label> Description </label>
+            <textarea placeholder="Add Description Here."></textarea>
+            
+            <label> Upload Photo Here. </label>
+            <input type="file" class="fm-control" name="photo" />
+            
+            <button type="submit" class="btn btn primary"> Upload Photo </button>
+        </form>
+   </div>
+   `,
+   methods:
+   {
+       uploadPhoto: function()
+       {
+           let uploadForm = document.getElementById('uploadForm');
+           let form_data = new FormData(uploadForm);
+           
+           fetch("/api/upload", 
+           {
+               method: 'POST',
+               body: form_data,
+               headers:
+               {
+                   'X-CSRFToken': token
+                   
+               },
+               credentials: 'same-origin'
+               
+           }).then(function (response)
+           {
+               return response.json();
+               
+           }).then(function(jsonResponse)
+           {
+               console.log(jsonResponse);
+               
+           }).catch(function (error)
+           {
+               console.log(error);
+               
+           });
+       }
+   }
+
+});
 // Instantiate our main Vue Instance
 let app = new Vue({
     el: "#app",
