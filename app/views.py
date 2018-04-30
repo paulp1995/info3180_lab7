@@ -5,8 +5,11 @@ Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
 
+import os
 from app import app
-from flask import render_template, request
+from flask import render_template, request, jsonify
+from forms import UploadForm
+from werkzeug.utils import secure_filename
 
 ###
 # Routing for your application.
@@ -18,6 +21,19 @@ def index():
     """Render website's initial page and let VueJS take over."""
     return render_template('index.html')
 
+@app.route('/api/upload', methods=['POST, GET'])
+def upload():
+    forms = UploadForm()
+    if request.methods == 'POST' and forms.validate_on_submit():
+        description = forms.description.data
+        photo = forms.photo.data
+        
+        filename = secure_filename(photo.filename)
+        photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            
+        return jsonify({ "message": "File Upload Successful", "filename": filename, "description": description })
+    error = form_errors(forms)
+    return jsonify({"Errors: ":error})
 
 # Here we define a function to collect form errors from Flask-WTF
 # which we can later use
